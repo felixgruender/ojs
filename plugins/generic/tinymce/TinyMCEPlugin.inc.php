@@ -357,13 +357,17 @@ class TinyMCEPlugin extends GenericPlugin {
 			foreach ($allLocales as $key => $locale) {
 				$localeList[] = String::substr($key, 0, 2);
 			}
+			
+			$sessionManager = SessionManager::getManager();
+			$userSession = $sessionManager->getUserSession();
+			$user = $userSession->getUser();
 
 			$tinymceScript = '
 			<script language="javascript" type="text/javascript" src="'.$baseUrl.'/'.TINYMCE_JS_PATH.'/tiny_mce_gzip.js"></script>
 			<script language="javascript" type="text/javascript">
 				tinyMCE_GZ.init({
 					relative_urls : "false",
-					plugins : "paste,jbimages,fullscreen",
+					plugins : "paste,fullscreen' . (!empty($user)? ',jbimages,publicfileuploader"' : '"') . ',
 					themes : "advanced",
 					languages : "' . join(',', $localeList) . '",
 					disk_cache : true
@@ -372,7 +376,7 @@ class TinyMCEPlugin extends GenericPlugin {
 			<script language="javascript" type="text/javascript">
 				tinyMCE.init({
 					entity_encoding : "raw",
-					plugins : "paste,jbimages,fullscreen",
+					plugins : "paste,fullscreen' . (!empty($user)? ',jbimages,publicfileuploader"' : '"') . ',
 					mode : "exact",
 					language : "' . String::substr(AppLocale::getLocale(), 0, 2) . '",
 					elements : "' . $enableFields . '",
@@ -381,7 +385,7 @@ class TinyMCEPlugin extends GenericPlugin {
 					paste_auto_cleanup_on_paste : true,
 					apply_source_formatting : false,
 					theme : "advanced",
-					theme_advanced_buttons1 : "cut,copy,paste,|,bold,italic,underline,bullist,numlist,|,link,unlink,help,code,fullscreen,jbimages",
+					theme_advanced_buttons1 : "cut,copy,paste,|,bold,italic,underline,bullist,numlist,|,link,unlink,help,code,fullscreen' . (!empty($user)? ',jbimages,publicfileuploader"' : '"') . ',
 					theme_advanced_buttons2 : "",
 					theme_advanced_buttons3 : ""
 				});
