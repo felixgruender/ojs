@@ -360,14 +360,33 @@ class TinyMCEPlugin extends GenericPlugin {
 			
 			$sessionManager = SessionManager::getManager();
 			$userSession = $sessionManager->getUserSession();
-			$user = $userSession->getUser();
-
+			$journal = $request->getJournal();
+			
+			// initial state: display neither jbimages nor publicfileuploader button
+			$uploadButtons = '",';
+			
+			if ($journal) {
+				$journalId = $journal->getId();
+				$userSession->setSessionVar('journalId', $journalId);
+				$user = $userSession->getUser();
+				
+				if ($user) {
+					if ($this->_uploadPermitted($user->getId(), $journalId)) {
+						// user is logged in and is permitted to upload public files: display jbimages and publicfileuploader buttons
+						$uploadButtons = ',jbimages,publicfileuploader",';
+					} else {
+						// user is logged in and is not permitted to upload public files: just display jbimages button
+						$uploadButtons = ',jbimages",';
+					}
+				}
+			}
+			
 			$tinymceScript = '
 			<script language="javascript" type="text/javascript" src="'.$baseUrl.'/'.TINYMCE_JS_PATH.'/tiny_mce_gzip.js"></script>
 			<script language="javascript" type="text/javascript">
 				tinyMCE_GZ.init({
 					relative_urls : "false",
-					plugins : "paste,fullscreen' . (!empty($user)? ',jbimages,publicfileuploader"' : '"') . ',
+					plugins : "paste,fullscreen' . $uploadButtons . '
 					themes : "advanced",
 					languages : "' . join(',', $localeList) . '",
 					disk_cache : true
@@ -376,7 +395,7 @@ class TinyMCEPlugin extends GenericPlugin {
 			<script language="javascript" type="text/javascript">
 				tinyMCE.init({
 					entity_encoding : "raw",
-					plugins : "paste,fullscreen' . (!empty($user)? ',jbimages,publicfileuploader"' : '"') . ',
+					plugins : "paste,fullscreen' . $uploadButtons . '
 					mode : "exact",
 					language : "' . String::substr(AppLocale::getLocale(), 0, 2) . '",
 					elements : "' . $enableFields . '",
@@ -385,7 +404,7 @@ class TinyMCEPlugin extends GenericPlugin {
 					paste_auto_cleanup_on_paste : true,
 					apply_source_formatting : false,
 					theme : "advanced",
-					theme_advanced_buttons1 : "cut,copy,paste,|,bold,italic,underline,bullist,numlist,|,link,unlink,help,code,fullscreen' . (!empty($user)? ',jbimages,publicfileuploader"' : '"') . ',
+					theme_advanced_buttons1 : "cut,copy,paste,|,bold,italic,underline,bullist,numlist,|,link,unlink,help,code,fullscreen' . $uploadButtons . '
 					theme_advanced_buttons2 : "",
 					theme_advanced_buttons3 : ""
 				});
@@ -429,6 +448,23 @@ class TinyMCEPlugin extends GenericPlugin {
 		$verbs = array();
 		if ($this->isMCEInstalled()) $verbs = parent::getManagementVerbs();
 		return $verbs;
+	}
+	
+	/**
+	 * Check if user has at least ROLE_ID_PROOFREADER (see classes/security/Role.inc.php) as highest role
+	 * @param $userId int, $journalId int
+	 * @return boolean
+	 */
+	function _uploadPermitted($userId, $journalId) {
+		import('classes.security.RoleDAO');
+		$roleDao = DAORegistry::getDAO('RoleDAO');
+		$roles = $roleDao->getRolesByUserId($userId, $journalId);
+		$roleIds = array();
+		
+		foreach($roles as $role) {
+			$roleIds[] = $role->getRoleId();
+		}
+		return min($roleIds) <= ROLE_ID_PROOFREADER;
 	}
 }
 ?>

@@ -33,25 +33,19 @@ class PublicFilesHandler extends Handler {
 	 * @return bool
 	 */
 	function delete($args, $request) {
-	
-		// it's necessary to be logged in to delete a file
 		$user = $request->getUser();
-		$currentUser = $user->getUserName();
-		if(!$currentUser) {
+		if(!$user) {
 			return false;
 		}
 		
-		$directoryOwner = $args[0];
+		$sessionManager = SessionManager::getManager();
+		$userSession = $sessionManager->getUserSession();
+		$journalId = $userSession->getSessionVar('journalId');
 		$fileName = $args[1];
 		
-		// logged in user can only delete files in his own directory
-		if (trim($currentUser) != trim($directoryOwner)) {
-			return false;
-		}
-		
-		$publicDir = $this->_getRealPublicFilesDir($directoryOwner);
+		$publicDir = $this->_getRealPublicFilesDir($journalId);
 		$filePath = $publicDir . $fileName;
-		
+
 		if($this->fileManager->deleteFile($filePath)) {
 			if (isset($_SERVER['HTTP_REFERER'])) {
 				$request->redirectUrl($_SERVER['HTTP_REFERER']);
@@ -62,16 +56,15 @@ class PublicFilesHandler extends Handler {
 
 
 	/**
-	 * Download a file from a user's public files directory
+	 * Download a file from a role's public files directory
 	 * @param $args array
 	 * @return bool
 	 */
 	function download($args) {
-		
-		$user = $args[0];
+		$journalId = $args[0];
 		$fileName = $args[1];
 		
-		$publicDir = $this->_getRealPublicFilesDir($user);
+		$publicDir = $this->_getRealPublicFilesDir($journalId);
 		$filePath = $publicDir . $fileName;
 		
 		// display file in the browser
@@ -80,12 +73,12 @@ class PublicFilesHandler extends Handler {
 	
 	
 	/**
-	 * Get the path of a user's public files directory
-	 * @param $user string
+	 * Get the path of a journal's public files directory
+	 * @param $journalId int
 	 * @return string
 	 */
-	function _getRealPublicFilesDir($user) {
-		$publicDir = Config::getVar('files', 'files_dir') . '/publicuploads/' . $user . '/';
+	function _getRealPublicFilesDir($journalId) {
+		$publicDir = Config::getVar('files', 'files_dir') . '/publicuploads/' . $journalId . '/';
 		return $publicDir;
 	}
 }

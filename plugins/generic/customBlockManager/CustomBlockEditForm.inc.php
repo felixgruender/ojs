@@ -3,8 +3,8 @@
 /**
  * @file plugins/generic/customBlockManager/CustomBlockEditForm.inc.php
  *
- * Copyright (c) 2013-2015 Simon Fraser University Library
- * Copyright (c) 2003-2015 John Willinsky
+ * Copyright (c) 2013-2014 Simon Fraser University Library
+ * Copyright (c) 2003-2014 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
  * @package plugins.generic.customBlockManager
@@ -64,6 +64,10 @@ class CustomBlockEditForm extends Form {
 
 		// Enable TinyMCE with specific params
 		$additionalHeadData = $templateMgr->get_template_vars('additionalHeadData');
+		
+		$sessionManager = SessionManager::getManager();
+		$userSession = $sessionManager->getUserSession();
+		$userSession->setSessionVar('journalId', $journalId);
 
 		import('classes.file.JournalFileManager');
 		$publicFileManager = new PublicFileManager();
