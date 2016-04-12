@@ -215,6 +215,9 @@ public_files_dir = public
 ; Permissions mask for created files and directories
 umask = 0022
 
+; Maximum file upload size for public files in [files_dir]/publicuploads/[journalId]/
+public_files_max_size = 20MB
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Fileinfo (MIME) Settings ;
