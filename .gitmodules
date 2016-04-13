@@ -13,3 +13,7 @@
 [submodule "plugins/reports/counter/classes/COUNTER"]
 	path = plugins/reports/counter/classes/COUNTER
 	url = git://github.com/ulsdevteam/COUNTER
+[submodule "plugins/generic/metadataExport"]
+	path = plugins/generic/metadataExport
+	url = https://github.com/ojsde/metadataExport
+	branch = ojs_stable_2_4_6
