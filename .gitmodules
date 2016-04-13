@@ -17,7 +17,3 @@
 	path = plugins/generic/metadataExport
 	url = https://github.com/ojsde/metadataExport
 	branch = ojs_stable_2_4_6
-[submodule "plugins/generic/pod"]
-	path = plugins/generic/pod
-	url = https://github.com/ojsde/pod
-	branch = ojs_stable_2_4_6
